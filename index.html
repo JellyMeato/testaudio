@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Car Crushers 2 Interactive Map</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css" />
+<style>
+html, body { height:100%; margin:0; background:#0b0b0f; color:#e0e0e0; font-family:"Segoe UI", Arial, sans-serif; }
+#map { height:100%; width:100%; background-color:#0d0d12; filter:brightness(0.9); position:relative; }
+#coords { position:absolute; bottom:10px; left:10px; background:rgba(20,20,25,0.85); color:#00ffaa; padding:6px 12px; border-radius:8px; font-size:14px; font-family:monospace; border:1px solid #222; z-index:1000; box-shadow:0 0 10px rgba(0,0,0,0.6); pointer-events:none; }
+#credit { position:absolute; bottom:10px; right:10px; background:rgba(20,20,25,0.85); color:#00ffaa; padding:6px 14px; border-radius:8px; font-size:14px; font-weight:600; letter-spacing:0.3px; font-family:"Segoe UI", sans-serif; border:1px solid #222; z-index:1000; box-shadow:0 0 15px rgba(0,255,170,0.2); user-select:none; transition:all 0.2s ease-in-out; }
+#credit:hover { background:rgba(30,30,35,0.9); box-shadow:0 0 20px rgba(0,255,170,0.35); transform:scale(1.02); }
+#muteBtn { position:absolute; bottom:50px; right:10px; background:rgba(20,20,25,0.85); color:#00ffaa; padding:6px 12px; border-radius:8px; font-size:14px; font-weight:600; letter-spacing:0.3px; font-family:"Segoe UI", sans-serif; border:1px solid #222; z-index:1000; box-shadow:0 0 15px rgba(0,255,170,0.2); user-select:none; cursor:pointer; transition:all 0.2s ease-in-out; }
+#muteBtn:hover { background:rgba(30,30,35,0.9); box-shadow:0 0 20px rgba(0,255,170,0.35); transform:scale(1.02); }
+.leaflet-control-zoom a { background-color:#1b1b1f !important; color:#fff !important; border:1px solid #333 !important; }
+.leaflet-control-zoom a:hover { background-color:#2d2d33 !important; }
+.leaflet-control-layers { background-color:rgba(20,20,25,0.9); color:#fff; border-radius:10px; padding:8px; box-shadow:0 0 10px rgba(0,0,0,0.6); }
+.leaflet-popup-content-wrapper { background:#1a1a20; color:#e0e0e0; border-radius:10px; border:1px solid #333; }
+.leaflet-popup-tip { background:#1a1a20; }
+::-webkit-scrollbar { width:8px; }
+::-webkit-scrollbar-track { background:#1a1a1d; }
+::-webkit-scrollbar-thumb { background:#444; border-radius:4px; }
+::-webkit-scrollbar-thumb:hover { background:#666; }
+#map::after { content:""; position:absolute; inset:0; box-shadow:0 0 80px rgba(0,0,0,0.9) inset; pointer-events:none; }
+.leaflet-control-attribution { display:none !important; }
+</style>
+</head>
+<body>
+<div id="map"></div>
+<div id="coords">X: 0 | Y: 0</div>
+<div id="credit">Made by @Jelly_Meato</div>
+<div id="muteBtn">🔊</div>
+<audio id="bgAudio" src="music.mp3" loop autoplay></audio>
+<script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+const mapWidth=3072; const mapHeight=1728; const bounds=[[0,0],[mapHeight,mapWidth]];
+const map=L.map('map',{crs:L.CRS.Simple,minZoom:-2,maxZoom:2,zoomSnap:0.5,zoomDelta:0.5,attributionControl:false});
+L.imageOverlay('map.png',bounds).addTo(map); map.fitBounds(bounds);
+const raceTracks=L.layerGroup(); const crushers=L.layerGroup(); const spawnPoints=L.layerGroup();
+const blueIcon=L.icon({iconUrl:'https://maps.gstatic.com/mapfiles/ms2/micons/blue-dot.png',iconSize:[32,32],iconAnchor:[16,32],popupAnchor:[0,-30]});
+const greenIcon=L.icon({iconUrl:'https://maps.gstatic.com/mapfiles/ms2/micons/green-dot.png',iconSize:[32,32],iconAnchor:[16,32],popupAnchor:[0,-30]});
+const redIcon=L.icon({iconUrl:'https://maps.gstatic.com/mapfiles/ms2/micons/red-dot.png',iconSize:[32,32],iconAnchor:[16,32],popupAnchor:[0,-30]});
+const raceTrackData=[{name:"Hickory Street Track",coords:[120,656]},{name:"Hickory Speedway",coords:[800,860]},{name:"Desert Street Track",coords:[1650,507]},{name:"Desert Speedway",coords:[1558,840]},{name:"Speedway Laps",coords:[1348,1636]},{name:"Volcano Sprint",coords:[1292,2203]},{name:"Ocean Street Circuit",coords:[764,2237]},{name:"Dirt Track",coords:[693,1480]},{name:"Ocean Sprint",coords:[900,1192]},{name:"Stunt Park",coords:[950,1563]},{name:"Runway Track",coords:[354,2273]}];
+raceTrackData.forEach(t=>{L.marker(t.coords,{icon:blueIcon}).bindPopup(`<b>${t.name}</b><br>Coords: [${t.coords[0]},${t.coords[1]}]`).addTo(raceTracks);});
+const spawnPointData=[{name:"Main Dealership Spawn",coords:[900,1450]},{name:"Police Spawn",coords:[961,1954]},{name:"Criminal Spawn",coords:[1159,478]}];
+spawnPointData.forEach(s=>{L.marker(s.coords,{icon:greenIcon}).bindPopup(`<b>${s.name}</b><br>Coords: [${s.coords[0]},${s.coords[1]}]`).addTo(spawnPoints);});
+const crusherData=[{name:"Row 4",coords:[999,1450]},{name:"Row 2",coords:[887,1566]},{name:"Row 3",coords:[887,1336]},{name:"Row 1",coords:[777,1450]}];
+crusherData.forEach(c=>{L.marker(c.coords,{icon:redIcon}).bindPopup(`<b>${c.name}</b><br>Coords: [${c.coords[0]},${c.coords[1]}]`).addTo(crushers);});
+const overlays={"Race Tracks":raceTracks,"Rows":crushers,"Spawn Points":spawnPoints};
+L.control.layers(null,overlays,{collapsed:false}).addTo(map);
+raceTracks.addTo(map); crushers.addTo(map); spawnPoints.addTo(map);
+map.on('dblclick',()=>map.fitBounds(bounds));
+const coordBox=document.getElementById("coords");
+map.on("mousemove",e=>{const y=e.latlng.lat.toFixed(1); const x=e.latlng.lng.toFixed(1); coordBox.textContent=`X: ${x} | Y: ${y}`;});
+map.on("mouseout",()=>{coordBox.textContent="X: -- | Y: --";});
+const audio=document.getElementById("bgAudio"); const muteBtn=document.getElementById("muteBtn"); let isMuted=false;
+muteBtn.addEventListener("click",()=>{isMuted=!isMuted; audio.muted=isMuted; muteBtn.textContent=isMuted?"🔇":"🔊";});
+</script>
+</body>
+</html>
